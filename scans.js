@@ -43,6 +43,28 @@ const SCANS = (function () {
       items: Array.from({ length: 58 }, (_, i) => ({ type: "page", seq: true, n: i + 1, src: Q(i + 1) })) },
   ];
 
+  groups.forEach((g) => { g.task = "task2"; });
+
+  // ---- Task 1 (partial: UpGrade — IELTS Academic Writing Task One) ----
+  function t1(id, title, color, blurb, labels) {
+    const images = labels.map((label, i) => ({ label, src: `assets/task1/${id}_${String(i + 1).padStart(2, "0")}.jpg` }));
+    return { id, title, color, blurb, task: "task1", note: null,
+      items: images.map((im) => ({ type: "page", label: im.label, src: im.src })) };
+  }
+  const TASK1 = [
+    t1("t1-intro", "Introduction", "#3a5a78", "Rubric, task types & band descriptors.",
+      ["p.1", "p.2", "p.3", "p.4", "p.5", "p.6", "p.7", "p.8"]),
+    t1("t1-process", "Process & Flowcharts", "#4a7a52", "Process, cycle & flowchart diagrams.",
+      ["p.34", "p.35", "p.36", "p.37", "p.38", "p.39", "p.40", "p.41", "p.42", "p.43", "p.44", "p.45", "p.46", "p.47", "Beer process", "Beer · language"]),
+    t1("t1-maps", "Maps", "#7a5aa0", "Describing maps & site plans.",
+      ["School site · p.48", "Island · task", "Island · model", "Map language"]),
+    t1("t1-more", "More Samples", "#c08a2e", "Worked examples: graphs, charts & tables.",
+      ["More Samples", "Line graph · task", "Line graph · model", "Goods graph · task", "Goods graph · model", "Goods · language",
+       "Multi-chart · task", "Multi-chart · model", "Multi-chart · notes", "Table · task", "Table · model",
+       "Expenditure · model", "Expenditure · language", "Age groups · task", "Age groups · model", "Age groups · language"]),
+  ];
+  TASK1.forEach((g) => groups.push(g));
+
   groups.forEach((g) => {
     g.images = g.items.filter((it) => it.type === "page");
     g.cover = g.images[0].src;

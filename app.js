@@ -321,7 +321,7 @@
   }
 
   const scanIcon = (c) => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${c}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>`;
-  const capLabel = (im) => im.seq ? `${im.n} / 58` : `p.${im.page}`;
+  const capLabel = (im) => im.label ? im.label : (im.seq ? `${im.n} / 58` : `p.${im.page}`);
 
   /* level 1 — minimalist Scans entrance */
   function viewScansHub() {
@@ -329,26 +329,38 @@
     const mark = el("div", "hub-mark"); mark.innerHTML = scanIcon("#fff");
     const kicker = el("div", "hub-kicker"); kicker.textContent = "Original Scans";
     const h1 = el("h1", "hub-title"); h1.textContent = "The Scanned Book";
-    const sub = el("p", "hub-sub"); sub.textContent = "Choose a chapter to browse the original pages.";
+    const sub = el("p", "hub-sub"); sub.textContent = "Browse the original pages by section.";
     page.append(mark, kicker, h1, sub);
 
-    const grid = el("div", "tiles");
-    SCANS.groups.forEach((g) => {
+    const tileFor = (g) => {
       const tile = el("button", "tile scan-tile");
       tile.style.setProperty("--tile-color", g.color);
       tile.style.setProperty("--tile-glow", g.color + "22");
+      const meta = g.label
+        ? `<span class="st-chip" style="background:${g.color}">${esc(g.label)}</span><span class="st-range">${esc(g.range)} · ${g.count} pages</span>`
+        : `<span class="st-range">${g.count} pages</span>`;
       tile.innerHTML =
         `<span class="st-thumb"><img loading="lazy" decoding="async" src="${g.cover}" alt=""></span>
          <span class="st-body">
            <span class="tile-name">${esc(g.title)}</span>
-           <span class="st-meta"><span class="st-chip" style="background:${g.color}">${esc(g.label)}</span><span class="st-range">${esc(g.range)} · ${g.count} pages</span></span>
+           <span class="st-meta">${meta}</span>
            <span class="tile-desc">${esc(g.blurb)}</span>
          </span>`;
       tile.addEventListener("click", () => go(`#/scans/${g.id}`));
-      grid.appendChild(tile);
+      return tile;
+    };
+
+    [["Writing Task 2", "task2", null], ["Writing Task 1", "task1", "partial"]].forEach(([label, task, tag]) => {
+      const list = SCANS.groups.filter((g) => g.task === task);
+      if (!list.length) return;
+      const h = el("div", "hub-group-title");
+      h.innerHTML = esc(label) + (tag ? ` <span class="hg-tag">${esc(tag)}</span>` : "");
+      page.appendChild(h);
+      const grid = el("div", "tiles"); grid.style.marginTop = "16px";
+      list.forEach((g) => grid.appendChild(tileFor(g)));
+      page.appendChild(grid);
     });
-    page.appendChild(grid);
-    const foot = el("div", "hub-foot"); foot.textContent = `${SCANS.count} photos in reading order · switch to Read up top`;
+    const foot = el("div", "hub-foot"); foot.textContent = `${SCANS.count} photos · Task 1 is a partial capture · switch to Read up top`;
     page.appendChild(foot);
     return page;
   }
@@ -363,7 +375,7 @@
 
     const head = el("header", "cat-head");
     const eb = el("div", "cat-eyebrow");
-    eb.innerHTML = `<span class="ei" style="background:${g.color}">${scanIcon("#fff")}</span><span>${esc(g.label)} · ${esc(g.range)}</span>`;
+    eb.innerHTML = `<span class="ei" style="background:${g.color}">${scanIcon("#fff")}</span><span>${esc(g.label ? g.label + " · " + g.range : "Task 1 · partial")}</span>`;
     const h = el("h1", "cat-title"); h.textContent = g.title;
     const intro = el("p", "cat-intro"); intro.textContent = g.blurb;
     head.append(eb, h, intro);
@@ -405,7 +417,7 @@
     const wrap = el("div", "pagewrap");
     const art = el("article", "article scan-single");
     const eb = el("div", "section-eyebrow");
-    eb.innerHTML = `<span class="pill" style="background:${g.color}22;color:${g.color}">${esc(g.label)} · ${esc(g.title)}</span><span class="pg">${esc(capLabel(im))}</span>`;
+    eb.innerHTML = `<span class="pill" style="background:${g.color}22;color:${g.color}">${esc((g.label || "Task 1") + " · " + g.title)}</span><span class="pg">${esc(capLabel(im))}</span>`;
     art.appendChild(eb);
     const img = el("img", "scan-img"); img.decoding = "async"; img.alt = "Scan " + capLabel(im); img.src = im.src;
     art.appendChild(img);
