@@ -551,5 +551,7 @@
   });
 
   /* ---------- boot ---------- */
+  // default landing = Scans hub (Read is still reachable via the toggle / #/)
+  if (!location.hash || location.hash === "#" || location.hash === "#/") history.replaceState(null, "", "#/scans");
   render();
 })();
